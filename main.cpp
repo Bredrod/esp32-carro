@@ -41,7 +41,7 @@ void IRAM_ATTR contarPulso() {
 //======= funcao leitura de tensao =======//
 float lerTensao(){
 
-  int leitura = analogRead(tensaoPin);
+  int leitura = analogRead(DIV_TENS);
 
   float tensaoESP =
   leitura * (3.3 / 4095.0);
@@ -56,17 +56,15 @@ float lerTensao(){
 //===== funcao leitura de temperatura ======//
 float lerTemperatura(){
 
-    int leitura = analogRead(NTC_PIN);
+    int leitura = analogRead(DIV_TENS);
 
-    float tensao =
-    leitura * (3.3 / 4095.0);
+    float tensao = leitura * (3.3 / 4095.0);
 
     // resistor fixo
     float Rfixo = 10000.0;
 
     // resistencia do NTC
-    float Rntc =
-    Rfixo * ((3.3 / tensao) - 1.0);
+    float Rntc = Rfixo * ((3.3 / tensao) - 1.0);
 
     // parametros do NTC
     float Beta = 3950.0;
