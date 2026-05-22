@@ -1,4 +1,4 @@
-
+#include <math.h>
 //===== controle micro SD ======//
 #include <SPI.h>
 #include <SD.h>
@@ -19,6 +19,60 @@ file arquivo;
 #define MOTOR2_R 16
 
 
+//======= funcao leitura de tensao =======//
+float lerTensao(){
+
+  int leitura = analogRead(tensaoPin);
+
+  float tensaoESP =
+  leitura * (3.3 / 4095.0);
+
+  float tensaoReal =
+  tensaoESP * 3.0;
+
+  return tensaoReal;
+
+}
+
+//===== funcao leitura de temperatura ======//
+float lerTemperatura(){
+
+    int leitura = analogRead(NTC_PIN);
+
+    float tensao =
+    leitura * (3.3 / 4095.0);
+
+    // resistor fixo
+    float Rfixo = 10000.0;
+
+    // resistencia do NTC
+    float Rntc =
+    Rfixo * ((3.3 / tensao) - 1.0);
+
+    // parametros do NTC
+    float Beta = 3950.0;
+    float T0 = 298.15; // 25°C em Kelvin
+    float R0 = 10000.0;
+
+    // equacao Beta
+    float temperaturaK =
+    1.0 /
+    (
+        (1.0 / T0)
+        +
+        (1.0 / Beta)
+        *
+        log(Rntc / R0)
+    );
+
+    // Kelvin -> Celsius
+    float temperaturaC =
+    temperaturaK - 273.15;
+
+    return temperaturaC;
+}
+
+
 //Controle de tempo
 unsigned long tempoAnterior = 0;
 const long intervalo = 1000;
@@ -36,6 +90,10 @@ Serial.println("SD pronto");
 }
 
 void loop(){
+  // ======= dados adquiridos =======//
+  float temperatura = lerTemperatura();
+  float tensao = lerTensao();
+
 //======== código de todo o sistema a partir daqui ========//
 
 
