@@ -5,11 +5,16 @@
 #define SD_CS 5
 File arquivo;
 // ocuparemos também os pinos 18, 19, 23 // 
+
+//===== iniciando bluetooth ====//
+#include "BluetoothSerial.h"
+BluetoothSerial SerialBT;
+
 //=============================//
 #define LED_AZUL 2
 #define LED_VERDE 13
 #define LED_VERMELHO 14
-#define TERMISTOR1 21
+#define TERMISTOR1 39
 #define BOTAO_RTD 34
 #define BOTAO_DOWN 35
 #define DIV_TENS 27
@@ -99,7 +104,9 @@ if(!SD.begin(SD_CS)) {
 }
 Serial.println("SD pronto");
 
-    
+//==== iniciando bluetooth ===//
+	SerialBT.begin("ESP32");
+	
 //==== definindo pinos ======//
     pinMode(LED_AZUL, OUTPUT);
     pinMode(LED_VERDE, OUTPUT);
@@ -116,7 +123,6 @@ Serial.println("SD pronto");
 	pinMode(BUZZER, OUTPUT);
     
   //===== inicialização sensor hall =======//
-pinMode(HALL_PIN, INPUT_PULLUP);
 attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 }
 
@@ -156,7 +162,7 @@ if (tempoAtual - tempoAnterior >= intervalo) {
     //==== sistema shutdown =====//
      bool motorLigado = (millis() - ultimoPulso < 500);
 if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || BOTAO_DOWN == HIGH){
-    estado = 5
+    estado = 5;
         }
 
 //====== sistema RTD =======//
