@@ -18,6 +18,7 @@ file arquivo;
 #define MOTOR2_L 26
 #define MOTOR2_R 16
 #define HALL_PIN 36
+#define BUZZER 33
 
 //variavel estado
 int estado = 0; 
@@ -113,6 +114,7 @@ Serial.println("SD pronto");
     pinMode(MOTOR2_H, OUTPUT);
     pinMode(MOTOR2_L, OUTPUT);
     pinMode(HALL_PIN, INPUT);
+	pinMode(BUZZER, OUTPUT);
     
   //===== inicialização sensor hall =======//
 pinMode(36, INPUT_PULLUP);
@@ -159,40 +161,41 @@ if (temperatura < 0 || temperatura > 45 || tensao < 6 || (motorLigado) || BOTAO_
 
 //====== sistema RTD =======//
     if(estado == 0 || estado == 5){
-	digitalWrite(vermelho,HIGH);
+	digitalWrite(LED_VERMELHO,HIGH);
 }
 
- if(digitalRead(botao) == HIGH){
-  digitalWrite(vermelho,LOW);
+ if(digitalRead(BOTAO_RTD) == HIGH){
+  digitalWrite(LED_VERMELHO, LOW);
    delay(200); 
   estado = 1;
-   
 }
 
-
- else if(estado == 1){
-	int temperaturaC = analogRead(temp); 
-  
-  	if(temperaturaC > 497){  
+ if(estado == 1){
+	 
+  	if(temperatura > 0 || temperatura < 45){  
     digitalWrite(vermelho, HIGH);
     digitalWrite(verde,HIGH);
     delay(2000);
     estado = 2;
   	}else{
-    digitalWrite(vermelho, HIGH);
+	estado = 0;
   	}
 }
 
- else if(estado == 2){
+ if (estado == 2){
   
-  digitalWrite(vermelho,LOW);
-  digitalWrite(verde,LOW);
+  digitalWrite(LED_VERMELHO,LOW);
+  digitalWrite(LED_VERDE,LOW);
   digitalWrite(buzzer,HIGH);
   delay(3000);
   digitalWrite(buzzer,LOW);
   
   estado = 3;
 }
+
+if (estado == 3){
+	digitalWrite(LED_VERDE, HIGH);
+	
 
 
   
