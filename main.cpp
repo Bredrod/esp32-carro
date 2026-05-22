@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <SD.h>
 #define SD_CS 5
-file arquivo;
+File arquivo;
 // ocuparemos também os pinos 18, 19, 23 // 
 //=============================//
 #define LED_AZUL 2
@@ -13,10 +13,10 @@ file arquivo;
 #define BOTAO_RTD 34
 #define BOTAO_DOWN 35
 #define DIV_TENS 27
-#define MOTOR1_L 4
-#define MOTOR1_R 25
-#define MOTOR2_L 26
-#define MOTOR2_R 16
+#define MOTOR1_H 4
+#define MOTOR1_L 25
+#define MOTOR2_H 26
+#define MOTOR2_L 16
 #define HALL_PIN 36
 #define BUZZER 33
 
@@ -26,14 +26,11 @@ int estado = 0;
 
 //======== sensor hall ========//
 volatile int pulsos = 0;
-
-void contarPulso(){
-    pulsos++;
-}
 volatile unsigned long ultimoPulso = 0;
 
-void IRAM_ATTR hallISR() {
-  ultimoPulso = millis();
+void IRAM_ATTR contarPulso() {
+    pulsos++;
+    ultimoPulso = millis();
 }
 
 //======= funcao leitura de tensao =======//
@@ -88,13 +85,15 @@ const long intervalo = 1000;
 
 //velocidade a definir circunferencia
 float circunferencia_roda = 0;
+float distancia = 0;
+float velocidade = 0;
 
 
 
 void setup() {
 //====== inicialização suporte SD =======//
 Serial.begin(115200);
-if(!SD.begin(SD_CS) {
+if(!SD.begin(SD_CS)) {
   Serial.println("Erro no SD");
   while(true);
 }
@@ -117,18 +116,19 @@ Serial.println("SD pronto");
 	pinMode(BUZZER, OUTPUT);
     
   //===== inicialização sensor hall =======//
-pinMode(36, INPUT_PULLUP);
-attachInterrupt(digitalPinToInterrupt(27), contarPulso, FALLING);
+pinMode(HALL_PIN, INPUT_PULLUP);
+attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 }
 
 void loop(){
+
   // ======= dados adquiridos =======//
   float temperatura = lerTemperatura();
   float tensao = lerTensao();
 
   //========= RPM =========//
-     pulsos = 0;
      int rpm = pulsos * 60;
+   		pulsos = 0;
 
   //======= velocidade e distancia em um segundo =======//
 if (tempoAtual - tempoAnterior >= intervalo) {
@@ -138,13 +138,13 @@ if (tempoAtual - tempoAnterior >= intervalo) {
     interrupts();
 
     // DISTÂNCIA percorrida nesse intervalo
-    float distancia = pulsosTemp * circunferencia_roda; //a definir circunferencia
+ distancia = pulsosTemp * circunferencia_roda; //a definir circunferencia
 
     // VELOCIDADE (m/s)
     velocidade = distancia / 1.0; // 1 segundo
 }
   //distancia total
-  int distancia_total;
+  int distancia_total = 0;
   distancia_total += pulsosTemp * circunferencia_roda;
 
 //======== código de todo o sistema a partir daqui ========//
