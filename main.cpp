@@ -17,6 +17,16 @@ file arquivo;
 #define MOTOR1_R 25
 #define MOTOR2_L 26
 #define MOTOR2_R 16
+#define HALL_PIN 36
+
+
+
+//======== sensor hall ========//
+volatile int pulsos = 0;
+
+void contarPulso(){
+    pulsos++;
+}
 
 
 //======= funcao leitura de tensao =======//
@@ -77,6 +87,9 @@ float lerTemperatura(){
 unsigned long tempoAnterior = 0;
 const long intervalo = 1000;
 
+//velocidade
+float circunferencia_roda;
+
 
 
 void setup() {
@@ -87,12 +100,38 @@ if(!SD.begin(SD_CS) {
   while(true);
 }
 Serial.println("SD pronto");
+
+  //===== inicialização sensor hall =======//
+pinMode(36, INPUT_PULLUP);
+
+    attachInterrupt(digitalPinToInterrupt(27), contarPulso, FALLING);
 }
 
 void loop(){
   // ======= dados adquiridos =======//
   float temperatura = lerTemperatura();
   float tensao = lerTensao();
+
+  //========= RPM =========//
+     pulsos = 0;
+     int rpm = pulsos * 60;
+
+  //======= velocidade e distancia em um segundo =======//
+if (tempoAtual - tempoAnterior >= intervalo) {
+  noInterrupts();
+    int pulsosTemp = pulsos;
+    pulsos = 0;
+    interrupts();
+
+    // DISTÂNCIA percorrida nesse intervalo
+    float distancia = pulsosTemp * circunferencia_roda; //a definir circunferencia
+
+    // VELOCIDADE (m/s)
+    velocidade = distancia / 1.0; // 1 segundo
+}
+  //distancia total
+  int distancia_total;
+  distancia_total += pulsosTemp * circunferencia_roda;
 
 //======== código de todo o sistema a partir daqui ========//
 
@@ -107,9 +146,7 @@ void loop(){
   
   //====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
 if (tempoAtual - tempoAnterior >= intervalo) {
-//nesse momento vamos atribuir uma variavel para cada dado a ser guardado//
-int ...;
-
+  
 arquivo = SD.open("/dados.txt", FILE_APPEND);
 
 if(arquivo) {
