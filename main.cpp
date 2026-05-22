@@ -155,7 +155,7 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 
     //==== sistema shutdown =====//
      bool motorLigado = (millis() - ultimoPulso < 500);
-if (temperatura < 0 || temperatura > 45 || tensao < 6 || (motorLigado) || BOTAO_DOWN == HIGH){
+if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || BOTAO_DOWN == HIGH){
     estado = 5
         }
 
@@ -172,9 +172,9 @@ if (temperatura < 0 || temperatura > 45 || tensao < 6 || (motorLigado) || BOTAO_
 
  if(estado == 1){
 	 
-  	if(temperatura > 0 || temperatura < 45){  
-    digitalWrite(vermelho, HIGH);
-    digitalWrite(verde,HIGH);
+  	if(temperatura > 0 && temperatura < 45){  
+    digitalWrite(LED_VERMELHO, HIGH);
+    digitalWrite(LED_VERDE,HIGH);
     delay(2000);
     estado = 2;
   	}else{
