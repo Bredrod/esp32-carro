@@ -19,6 +19,8 @@ file arquivo;
 #define MOTOR2_R 16
 #define HALL_PIN 36
 
+//variavel estado
+int estado = 0; 
 
 
 //======== sensor hall ========//
@@ -27,7 +29,11 @@ volatile int pulsos = 0;
 void contarPulso(){
     pulsos++;
 }
+volatile unsigned long ultimoPulso = 0;
 
+void IRAM_ATTR hallISR() {
+  ultimoPulso = millis();
+}
 
 //======= funcao leitura de tensao =======//
 float lerTensao(){
@@ -65,15 +71,7 @@ float lerTemperatura(){
     float R0 = 10000.0;
 
     // equacao Beta
-    float temperaturaK =
-    1.0 /
-    (
-        (1.0 / T0)
-        +
-        (1.0 / Beta)
-        *
-        log(Rntc / R0)
-    );
+    float temperaturaK =  1.0 / (  (1.0 / T0)  +  (1.0 / Beta)   *  log(Rntc / R0) );
 
     // Kelvin -> Celsius
     float temperaturaC =
@@ -101,10 +99,24 @@ if(!SD.begin(SD_CS) {
 }
 Serial.println("SD pronto");
 
+    
+//==== definindo pinos ======//
+    pinMode(LED_AZUL, OUTPUT);
+    pinMode(LED_VERDE, OUTPUT);
+    pinMode(LED_VERMELHO, OUTPUT);
+    pinMode(TERMISTOR1, INPUT);
+    pinMode(BOTAO_RTD, INPUT);
+    pinMode(BOTAO_DOWN, INPUT);
+    pinMode(DIV_TENS, INPUT);
+    pinMode(MOTOR1_H, OUTPUT);
+    pinMode(MOTOR1_L, OUTPUT);
+    pinMode(MOTOR2_H, OUTPUT);
+    pinMode(MOTOR2_L, OUTPUT);
+    pinMode(HALL_PIN, INPUT);
+    
   //===== inicialização sensor hall =======//
 pinMode(36, INPUT_PULLUP);
-
-    attachInterrupt(digitalPinToInterrupt(27), contarPulso, FALLING);
+attachInterrupt(digitalPinToInterrupt(27), contarPulso, FALLING);
 }
 
 void loop(){
@@ -135,7 +147,52 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 
 //======== código de todo o sistema a partir daqui ========//
 
+    //leitura botoes
+    digitalRead(BOTAO_RTD);
+    digitalRead(BOTAO_DOWN);
 
+    //==== sistema shutdown =====//
+     bool motorLigado = (millis() - ultimoPulso < 500);
+if (temperatura < 0 || temperatura > 45 || tensao < 6 || (motorLigado) || BOTAO_DOWN == HIGH){
+    estado = 5
+        }
+
+//====== sistema RTD =======//
+    if(estado == 0 || estado == 5){
+	digitalWrite(vermelho,HIGH);
+}
+
+ if(digitalRead(botao) == HIGH){
+  digitalWrite(vermelho,LOW);
+   delay(200); 
+  estado = 1;
+   
+}
+
+
+ else if(estado == 1){
+	int temperaturaC = analogRead(temp); 
+  
+  	if(temperaturaC > 497){  
+    digitalWrite(vermelho, HIGH);
+    digitalWrite(verde,HIGH);
+    delay(2000);
+    estado = 2;
+  	}else{
+    digitalWrite(vermelho, HIGH);
+  	}
+}
+
+ else if(estado == 2){
+  
+  digitalWrite(vermelho,LOW);
+  digitalWrite(verde,LOW);
+  digitalWrite(buzzer,HIGH);
+  delay(3000);
+  digitalWrite(buzzer,LOW);
+  
+  estado = 3;
+}
 
 
   
