@@ -86,8 +86,8 @@ float lerTemperatura(){
 unsigned long tempoAnterior = 0;
 const long intervalo = 1000;
 
-//velocidade
-float circunferencia_roda;
+//velocidade a definir circunferencia
+float circunferencia_roda = 0;
 
 
 
@@ -184,37 +184,42 @@ if (temperatura < 0 || temperatura > 45 || tensao < 6 || (motorLigado) || BOTAO_
 
  if (estado == 2){
   
-  digitalWrite(LED_VERMELHO,LOW);
-  digitalWrite(LED_VERDE,LOW);
-  digitalWrite(buzzer,HIGH);
+  digitalWrite(LED_VERMELHO, LOW);
+  digitalWrite(LED_VERDE, LOW);
+  digitalWrite(BUZZER, HIGH);
   delay(3000);
-  digitalWrite(buzzer,LOW);
+  digitalWrite(BUZZER, LOW);
   
   estado = 3;
 }
 
 if (estado == 3){
 	digitalWrite(LED_VERDE, HIGH);
-	
+	digitalWrite(MOTOR1_H, HIGH);
+  	digitalWrite(MOTOR1_L, LOW);
+	digitalWrite(MOTOR2_H, HIGH);
+  	digitalWrite(motor2_L, LOW);
 
-
-  
-  
-  
-  
-  
-  
-  //====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
+	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
 if (tempoAtual - tempoAnterior >= intervalo) {
   
 arquivo = SD.open("/dados.txt", FILE_APPEND);
 
 if(arquivo) {
-arquivo.print("---: ---);
-  arquivo.print(---)
-
-  arquivo.close();
-  Serial.print("Dados salvos");
+arquivo.print(" temperatura em celsius: ");
+arquivo.println(temperatura);
+arquivo.print(" tensao em volts: ");
+arquivo.println(tensao);
+arquivo.print(" RPM: ");
+arquivo.print(rpm);
+arquivo.print(" velocidade m/s: ");
+arquivo.println(velocidade);
+arquivo.print(" distancia percorrida: ");
+arquivo.println(distancia);	
+	
+arquivo.close();
+Serial.print("Dados salvos");
+SerialBT.print("Dados salvos");	
     }
   }
 }
