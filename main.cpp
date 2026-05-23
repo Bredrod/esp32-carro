@@ -90,6 +90,7 @@ const long intervalo = 1000;
 float circunferencia_roda = 0;
 float distancia = 0;
 float velocidade = 0;
+ int distancia_total = 0;
 
 
 
@@ -125,6 +126,7 @@ attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 }
 
 void loop(){
+unsigned long tempoAtual = millis();
 
   // ======= dados adquiridos =======//
   float temperatura = lerTemperatura();
@@ -141,6 +143,9 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 	 pulsos = 0;
     interrupts();
 
+	//rpm
+	rpm = pulsosTemp * 60;
+
     // DISTÂNCIA percorrida nesse intervalo
  distancia = pulsosTemp * circunferencia_roda; //a definir circunferencia
 
@@ -148,8 +153,8 @@ if (tempoAtual - tempoAnterior >= intervalo) {
     velocidade = distancia / 1.0; // 1 segundo
 	
 	 //distancia total
-  int distancia_total = 0;
   distancia_total += pulsosTemp * circunferencia_roda;
+	tempoAnterior = tempoAtual;
 }
  
 
