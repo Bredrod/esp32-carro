@@ -56,7 +56,7 @@ float lerTensao(){
 //===== funcao leitura de temperatura ======//
 float lerTemperatura(){
 
-    int leitura = analogRead(DIV_TENS);
+    int leitura = analogRead(TERMISTOR1);
 
     float tensao = leitura * (3.3 / 4095.0);
 
@@ -130,15 +130,15 @@ void loop(){
   float temperatura = lerTemperatura();
   float tensao = lerTensao();
 
-  //========= RPM =========//
-     int rpm = pulsos * 60;
-   		pulsos = 0;
 
-  //======= velocidade e distancia em um segundo =======//
+  //======= RPM, velocidade e distancia em um segundo =======//
+int pulsosTemp = 0;
+int rpm = 0;  
+
 if (tempoAtual - tempoAnterior >= intervalo) {
   noInterrupts();
-    int pulsosTemp = pulsos;
-    pulsos = 0;
+   pulsosTemp = pulsos;
+	 pulsos = 0;
     interrupts();
 
     // DISTÂNCIA percorrida nesse intervalo
@@ -146,10 +146,12 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 
     // VELOCIDADE (m/s)
     velocidade = distancia / 1.0; // 1 segundo
-}
-  //distancia total
+	
+	 //distancia total
   int distancia_total = 0;
   distancia_total += pulsosTemp * circunferencia_roda;
+}
+ 
 
 //======== código de todo o sistema a partir daqui ========//
 
