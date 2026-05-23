@@ -91,6 +91,9 @@ float circunferencia_roda = 0;
 float distancia = 0;
 float velocidade = 0;
  int distancia_total = 0;
+int pulsosTemp = 0;
+int rpm = 0;  
+
 
 
 
@@ -134,8 +137,6 @@ unsigned long tempoAtual = millis();
 
 
   //======= RPM, velocidade e distancia em um segundo =======//
-int pulsosTemp = 0;
-int rpm = 0;  
 
 if (tempoAtual - tempoAnterior >= intervalo) {
   noInterrupts();
