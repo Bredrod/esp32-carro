@@ -91,7 +91,6 @@ float circunferencia_roda = 0;
 float distancia = 0;
 float velocidade = 0;
  int distancia_total = 0;
-int pulsosTemp = 0;
 int rpm = 0;  
 
 
@@ -137,7 +136,7 @@ unsigned long tempoAtual = millis();
 
 
   //======= RPM, velocidade e distancia em um segundo =======//
-
+int pulsosTemp = 0;
 if (tempoAtual - tempoAnterior >= intervalo) {
   noInterrupts();
    pulsosTemp = pulsos;
@@ -162,12 +161,12 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 //======== código de todo o sistema a partir daqui ========//
 
     //leitura botoes
-    digitalRead(BOTAO_RTD);
-    digitalRead(BOTAO_DOWN);
+    bool botaoRTD = digitalRead(BOTAO_RTD);
+ 	bool botaoDown = digitalRead(BOTAO_DOWN);
 
     //==== sistema shutdown =====//
      bool motorLigado = (millis() - ultimoPulso < 500);
-if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || BOTAO_DOWN == HIGH){
+if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || botaoDown == HIGH){
     estado = 5;
         }
 
@@ -176,7 +175,7 @@ if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || BOTAO
 	digitalWrite(LED_VERMELHO,HIGH);
 }
 
- if(digitalRead(BOTAO_RTD) == HIGH){
+ if(botaoRTD == HIGH){
   digitalWrite(LED_VERMELHO, LOW);
    delay(200); 
   estado = 1;
@@ -210,7 +209,7 @@ if (estado == 3){
 	digitalWrite(MOTOR1_H, HIGH);
   	digitalWrite(MOTOR1_L, LOW);
 	digitalWrite(MOTOR2_H, HIGH);
-  	digitalWrite(motor2_L, LOW);
+  	digitalWrite(MOTOR2_L, LOW);
 
 	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
 if (tempoAtual - tempoAnterior >= intervalo) {
@@ -233,7 +232,8 @@ arquivo.close();
 Serial.print("Dados salvos");
 SerialBT.print("Dados salvos");	
     }
-  }
+ tempoAnterior = tempoAtual; 
+}
 //==== imprimindo informações no painel serial ====//
 Serial.print(" temperatura em celsius: ");
 Serial.println(temperatura);
