@@ -156,7 +156,7 @@ if (tempoAtual - tempoAnterior >= intervalo) {
   distancia_total += pulsosTemp * circunferencia_roda;
 
 	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
-  
+  if(estado == 3){
 arquivo = SD.open("/dados.txt", FILE_APPEND);
 
 if(arquivo) {
@@ -176,8 +176,9 @@ Serial.print("Dados salvos");
 SerialBT.print("Dados salvos");	
     	}
 
-	tempoAnterior = tempoAtual;
+	
 	}
+	tempoAnterior = tempoAtual;
 }
 
 //======== código de todo o sistema a partir daqui ========//
@@ -263,4 +264,4 @@ SerialBT.print(" velocidade m/s: ");
 SerialBT.println(velocidade);
 SerialBT.print(" distancia percorrida: ");
 SerialBT.println(distancia);	
-}
+	}
