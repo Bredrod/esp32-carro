@@ -155,15 +155,7 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 	 //distancia total
   distancia_total += pulsosTemp * circunferencia_roda;
 
-	if (estado == 3){
-	digitalWrite(LED_VERDE, HIGH);
-	digitalWrite(MOTOR1_H, HIGH);
-  	digitalWrite(MOTOR1_L, LOW);
-	digitalWrite(MOTOR2_H, HIGH);
-  	digitalWrite(MOTOR2_L, LOW);
-
 	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
-
   
 arquivo = SD.open("/dados.txt", FILE_APPEND);
 
@@ -244,28 +236,8 @@ if (estado == 3){
   	digitalWrite(MOTOR1_L, LOW);
 	digitalWrite(MOTOR2_H, HIGH);
   	digitalWrite(MOTOR2_L, LOW);
-
+}
 	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
-
-  
-arquivo = SD.open("/dados.txt", FILE_APPEND);
-
-if(arquivo) {
-arquivo.print(" temperatura em celsius: ");
-arquivo.println(temperatura);
-arquivo.print(" tensao em volts: ");
-arquivo.println(tensao);
-arquivo.print(" RPM: ");
-arquivo.print(rpm);
-arquivo.print(" velocidade m/s: ");
-arquivo.println(velocidade);
-arquivo.print(" distancia percorrida: ");
-arquivo.println(distancia);	
-	
-arquivo.close();
-Serial.print("Dados salvos");
-SerialBT.print("Dados salvos");	
-    }
 
 
 //==== imprimindo informações no painel serial ====//
