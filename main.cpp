@@ -90,7 +90,7 @@ const long intervalo = 1000;
 float circunferencia_roda = 0;
 float distancia = 0;
 float velocidade = 0;
- int distancia_total = 0;
+float distancia_total = 0;
 int rpm = 0;  
 
 
@@ -154,9 +154,39 @@ if (tempoAtual - tempoAnterior >= intervalo) {
 	
 	 //distancia total
   distancia_total += pulsosTemp * circunferencia_roda;
+
+	if (estado == 3){
+	digitalWrite(LED_VERDE, HIGH);
+	digitalWrite(MOTOR1_H, HIGH);
+  	digitalWrite(MOTOR1_L, LOW);
+	digitalWrite(MOTOR2_H, HIGH);
+  	digitalWrite(MOTOR2_L, LOW);
+
+	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
+
+  
+arquivo = SD.open("/dados.txt", FILE_APPEND);
+
+if(arquivo) {
+arquivo.print(" temperatura em celsius: ");
+arquivo.println(temperatura);
+arquivo.print(" tensao em volts: ");
+arquivo.println(tensao);
+arquivo.print(" RPM: ");
+arquivo.print(rpm);
+arquivo.print(" velocidade m/s: ");
+arquivo.println(velocidade);
+arquivo.print(" distancia percorrida: ");
+arquivo.println(distancia);	
+	
+arquivo.close();
+Serial.print("Dados salvos");
+SerialBT.print("Dados salvos");	
+    	}
+
 	tempoAnterior = tempoAtual;
+	}
 }
- 
 
 //======== código de todo o sistema a partir daqui ========//
 
@@ -168,6 +198,10 @@ if (tempoAtual - tempoAnterior >= intervalo) {
      bool motorLigado = (millis() - ultimoPulso < 500);
 if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || botaoDown == HIGH){
     estado = 5;
+	digitalWrite(MOTOR1_H, LOW);
+    digitalWrite(MOTOR1_L, LOW);
+    digitalWrite(MOTOR2_H, LOW);
+    digitalWrite(MOTOR2_L, LOW);
         }
 
 //====== sistema RTD =======//
@@ -175,7 +209,7 @@ if (temperatura < 0 || temperatura > 45 || tensao < 6 || (!motorLigado) || botao
 	digitalWrite(LED_VERMELHO,HIGH);
 }
 
- if(botaoRTD == HIGH){
+ if(botaoRTD == HIGH && (estado == 0 || estado == 5)){
   digitalWrite(LED_VERMELHO, LOW);
    delay(200); 
   estado = 1;
@@ -212,7 +246,7 @@ if (estado == 3){
   	digitalWrite(MOTOR2_L, LOW);
 
 	//====== Vamos usar esta aba para alocar os dados requeridos no microSD, repetindo o mesmo cabecalho, e controle tempo =======//
-if (tempoAtual - tempoAnterior >= intervalo) {
+
   
 arquivo = SD.open("/dados.txt", FILE_APPEND);
 
@@ -232,8 +266,8 @@ arquivo.close();
 Serial.print("Dados salvos");
 SerialBT.print("Dados salvos");	
     }
- tempoAnterior = tempoAtual; 
-}
+
+
 //==== imprimindo informações no painel serial ====//
 Serial.print(" temperatura em celsius: ");
 Serial.println(temperatura);
