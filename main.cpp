@@ -11,19 +11,19 @@ File arquivo;
 BluetoothSerial SerialBT;
 
 //=============================//
-#define LED_AZUL 2
-#define LED_VERDE 13
-#define LED_VERMELHO 14
+#define LED_AZUL 4
+#define LED_VERDE 2
+#define LED_VERMELHO 15
 #define TERMISTOR1 39
 #define BOTAO_RTD 34
 #define BOTAO_DOWN 35
-#define DIV_TENS 27
-#define MOTOR1_H 4
-#define MOTOR1_L 25
-#define MOTOR2_H 26
-#define MOTOR2_L 16
+#define DIV_TENS 26
+#define MOTOR1_H 25
+#define MOTOR1_L 13
+#define MOTOR2_H 14
+#define MOTOR2_L 27
 #define HALL_PIN 36
-#define BUZZER 33
+#define BUZZER 22
 
 //variavel estado
 int estado = 0; 
