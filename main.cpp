@@ -7,8 +7,10 @@ File arquivo;
 // ocuparemos também os pinos 18, 19, 23 // 
 
 //===== iniciando bluetooth ====//
-#include "BluetoothSerial.h"
-BluetoothSerial SerialBT;
+#include <WiFi.h>
+
+const char* ssid = "SEU_SSID";
+const char* password = "SUA_SENHA";
 
 //=============================//
 #define LED_AZUL 4
@@ -97,6 +99,7 @@ int rpm = 0;
 
 
 void setup() {
+	delay
 //====== inicialização suporte SD =======//
 Serial.begin(115200);
 if(!SD.begin(SD_CS)) {
@@ -105,9 +108,28 @@ if(!SD.begin(SD_CS)) {
 }
 Serial.println("SD pronto");
 
-//==== iniciando bluetooth ===//
-	SerialBT.begin("ESP32");
-	
+//==== iniciando wifi ===//
+	Serial.print("Conectando a ");
+  Serial.println(ssid);
+	delay(1000);
+  Serial.println();
+  Serial.print("Conectando a ");
+  Serial.println(ssid);
+
+  // Conexão como estação
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+  // Espera até conectar
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+	 Serial.println();
+  Serial.println("Conectado!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+
 //==== definindo pinos ======//
     pinMode(LED_AZUL, OUTPUT);
     pinMode(LED_VERDE, OUTPUT);
