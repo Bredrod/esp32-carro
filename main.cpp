@@ -275,15 +275,4 @@ Serial.println(velocidade);
 Serial.print(" distancia percorrida: ");
 Serial.println(distancia);	
 	
-// imprimindo no serial bluetooth
-SerialBT.print(" temperatura em celsius: ");
-SerialBT.println(temperatura);
-SerialBT.print(" tensao em volts: ");
-SerialBT.println(tensao);
-SerialBT.print(" RPM: ");
-SerialBT.print(rpm);
-SerialBT.print(" velocidade m/s: ");
-SerialBT.println(velocidade);
-SerialBT.print(" distancia percorrida: ");
-SerialBT.println(distancia);	
 	}
