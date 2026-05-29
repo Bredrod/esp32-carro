@@ -5,7 +5,7 @@
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL2oEF18NbX"
 #define BLYNK_TEMPLATE_NAME "Telemetria Tesla"
-#define BLYNK_AUTH_TOKEN "31qqdUd7bzKjkoZZPrCm1eL2PgXMry53"
+#define BLYNK_AUTH_TOKEN "uukaS9A9TKgGur3neHDQjQSVWYr3XHO-"
 
 float Temperatura;
 float RPM;
@@ -110,13 +110,6 @@ float lerTemperatura() {
 // função chamada periodicamente
 void myTimer() {
 
-  // leitura analógica
-  Temperatura = lerTemperatura();
-  RPM = rpm;
-  Velocidade = velocidade;
-  Distancia = distancia_total;
-  Tensao = lerTensao();
-
   Blynk.virtualWrite(V0, Temperatura);
   Blynk.virtualWrite(V1, RPM);
   Blynk.virtualWrite(V2, Velocidade);
@@ -140,20 +133,9 @@ int estado = 0;
 void setup() {
   Serial.begin(115200);
 
-   Blynk.begin(BLYNK_AUTH_TOKEN, "M34 de Jao", "epiphonecasino");
+   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, senha);
 
-  // inicia Wi-Fi
-  WiFi.begin(ssid, senha);
 
-  Serial.print("Conectando");
-
-  // espera conectar
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("\nWi-Fi conectado!");
 
   // mostra IP
   Serial.print("IP do ESP32: ");
@@ -177,12 +159,13 @@ void setup() {
     analogSetPinAttenuation(DIV_TENS, ADC_11db);
 
 attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
+timer.setInterval(1000L, myTimer); 
 }
 
 void loop(){
+   timer.run(); 
    Blynk.run();
-  float tensao = lerTensao();
-  float temp = lerTemperatura();
+  
   unsigned long tempoAtual = millis();
 
 
@@ -274,5 +257,9 @@ int leitura = digitalRead(TERMISTOR1);
   distancia_total += pulsosTemp * circunferencia_roda;
   
  }
- 
+  Temperatura = lerTemperatura();
+  RPM = rpm
+  Velocidade = velocidade
+  Distancia = distancia_total
+  Tensao = lerTensao()
 }
