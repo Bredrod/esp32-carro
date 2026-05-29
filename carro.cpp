@@ -1,11 +1,13 @@
 #include <math.h>
 
-#include <WiFi.h>
-#include <BlynkSimpleEsp32.h>
+
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL2oEF18NbX"
 #define BLYNK_TEMPLATE_NAME "Telemetria Tesla"
 #define BLYNK_AUTH_TOKEN "uukaS9A9TKgGur3neHDQjQSVWYr3XHO-"
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+
 
 float Temperatura;
 float RPM;
@@ -116,17 +118,7 @@ void myTimer() {
   Blynk.virtualWrite(V3, Distancia);
   Blynk.virtualWrite(V4, Tensao);
 
-  // mostra no serial
-  Serial.print("Temperatura:")
-  Serial.println(Temperatura);
-  Serial.print("RPM")
-  Serial.println(RPM);
-  Serial.print("Velocidade:")
-  Serial.println(Velocidade);
-  Serial.print("Distancia:")
-  Serial.println(Distancia);
-  Serial.print("Tensao:")
-  Serial.println(Tensao);
+ 
 }
 
 int estado = 0;
@@ -157,7 +149,6 @@ void setup() {
     pinMode(HALL_PIN, INPUT);
 
     analogSetPinAttenuation(DIV_TENS, ADC_11db);
-
 attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 timer.setInterval(1000L, myTimer); 
 }
@@ -216,7 +207,7 @@ else if(estado == 3){
     digitalWrite(MOTOR2_L, LOW);
   }
 
-if(digitalRead(BOTAO_DOWN) == HIGH || tensao < 6 ){
+if(digitalRead(BOTAO_DOWN) == HIGH || Tensao < 6 ){
   estado = 4;
 }
 
@@ -255,11 +246,29 @@ int leitura = digitalRead(TERMISTOR1);
 	
 	 //distancia total
   distancia_total += pulsosTemp * circunferencia_roda;
+
+int adc = analogRead(HALL_PIN);
+
+   Serial.print("Pulsos por segundo: ");
+  Serial.println(pulsosTemp);
+   Serial.print("Temperatura:");
+  Serial.println(Temperatura);
+  Serial.print("RPM");
+  Serial.println(RPM);
+  Serial.print("Velocidade:");
+  Serial.println(Velocidade);
+  Serial.print("Distancia:");
+  Serial.println(Distancia);
+  Serial.print("Tensao:");
+  Serial.println(Tensao);
   
  }
   Temperatura = lerTemperatura();
-  RPM = rpm
-  Velocidade = velocidade
-  Distancia = distancia_total
-  Tensao = lerTensao()
+  RPM = rpm;
+  Velocidade = velocidade;
+  Distancia = distancia_total;
+  Tensao = lerTensao();
+
+   // mostra no serial
+ 
 }
