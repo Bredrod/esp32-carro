@@ -1,5 +1,12 @@
 #include <math.h>
 
+#include <FS.h>
+#include <SD.h>
+#include <SPI.h>
+#define SD_CS 5
+
+
+
 
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL2oEF18NbX"
@@ -8,23 +15,10 @@
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
 
-
-float Temperatura;
-float RPM;
-float Velocidade;
-float Distancia;
-float Tensao;
-
-
-
-// objeto timer
-BlynkTimer timer;
-
-
-
 // dados da rede
 const char* ssid = "M34 de Jao";
 const char* senha = "epiphonecasino";
+
 
 unsigned long tempoAnterior = 0;
 unsigned long intervalo = 1000;
@@ -36,7 +30,7 @@ unsigned long intervalo = 1000;
 #define TERMISTOR1 33
 #define BOTAO_RTD 34
 #define BOTAO_DOWN 35
-#define DIV_TENS 26
+#define DIV_TENS 32
 #define MOTOR1_H 25
 #define MOTOR1_L 13
 #define MOTOR2_H 14
@@ -52,7 +46,12 @@ volatile int pulsos = 0;
 volatile unsigned long ultimoPulso = 0;
 
 void IRAM_ATTR contarPulso() {
+  unsigned long agora = micros();
+
+  if (agora - ultimoPulso > 5000) { // 3 ms
     pulsos++;
+    ultimoPulso = agora;
+  }
 }
 
 //velocidade a definir circunferencia
@@ -109,29 +108,70 @@ float lerTemperatura() {
 }
 
 
-// função chamada periodicamente
-void myTimer() {
 
+float sensorVal1;
+int sensorVal2;
+int sensorVal3;
+
+BlynkTimer timer; 
+float tensao;
+float Temperatura;
+void myTimer() 
+{
   Blynk.virtualWrite(V0, Temperatura);
-  Blynk.virtualWrite(V1, RPM);
-  Blynk.virtualWrite(V2, Velocidade);
-  Blynk.virtualWrite(V3, Distancia);
-  Blynk.virtualWrite(V4, Tensao);
-
- 
+  Blynk.virtualWrite(V1, sensorVal1);
+  Blynk.virtualWrite(V2, sensorVal2);
+  Blynk.virtualWrite(V3, sensorVal3);  
+  Blynk.virtualWrite(V4, tensao);
 }
 
+void salvarSD(){
+
+  File arquivo = SD.open("/telemetria.csv", FILE_APPEND);
+
+  if(arquivo){
+
+    arquivo.print(millis()/1000);
+    arquivo.print(",");
+
+    arquivo.print(Temperatura);
+    arquivo.print(",");
+
+    arquivo.print(rpm);
+    arquivo.print(",");
+
+    arquivo.print(velocidade);
+    arquivo.print(",");
+
+    arquivo.print(distancia_total);
+    arquivo.print(",");
+
+    arquivo.println(tensao);
+
+    arquivo.close();
+
+    Serial.println("Dados salvos");
+  }
+
+  else{
+    Serial.println("Erro ao abrir arquivo");
+  }
+}
+
+
 int estado = 0;
+unsigned long tempoEstado = 0;
 void setup() {
   Serial.begin(115200);
 
-   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, senha);
+ Blynk.begin(BLYNK_AUTH_TOKEN, ssid, senha);
 
 
 
   // mostra IP
   Serial.print("IP do ESP32: ");
   Serial.println(WiFi.localIP());
+  
  
 //definindo pinos
     pinMode(BOTAO_DOWN, INPUT);
@@ -151,12 +191,26 @@ void setup() {
     analogSetPinAttenuation(DIV_TENS, ADC_11db);
 attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 timer.setInterval(1000L, myTimer); 
+
+if(!SD.begin(SD_CS)){
+  Serial.println("Erro no cartao SD");
+  return;
+}
+
+Serial.println("Cartao SD iniciado");
+
+File arquivo = SD.open("/telemetria.csv", FILE_WRITE);
+
+if(arquivo){
+  arquivo.println("Tempo,Temperatura,RPM,Velocidade,Distancia,Tensao");
+  arquivo.close();
+}
+
 }
 
 void loop(){
-   timer.run(); 
-   Blynk.run();
-  
+ tensao = lerTensao();
+ Temperatura = lerTemperatura();
   unsigned long tempoAtual = millis();
 
 
@@ -164,7 +218,7 @@ void loop(){
 if(estado == 0 || estado == 4){
 
     digitalWrite(led_vermelho, HIGH);
-
+}
     if(digitalRead(BOTAO_RTD) == HIGH){
 
         digitalWrite(led_vermelho, LOW);
@@ -173,28 +227,36 @@ if(estado == 0 || estado == 4){
 
         estado = 1;
     }
-}
 
-else if(estado == 1){
+
+
+   else if(estado == 1){
 
     digitalWrite(led_verde, HIGH);
     digitalWrite(led_vermelho, HIGH);
     delay(1000);
-
     estado = 2;
-}
+    }
+
+
 
 else if(estado == 2){
     digitalWrite(led_verde, LOW);
     digitalWrite(led_vermelho, LOW);
     digitalWrite(buzzer, HIGH);
-
-    delay(3000);
-
+    delay(500);
     digitalWrite(buzzer, LOW);
-
+    delay(700);
+     digitalWrite(buzzer, HIGH);
+    delay(500);
+    digitalWrite(buzzer, LOW);
+    delay(700);
+     digitalWrite(buzzer, HIGH);
+    delay(500);
+    digitalWrite(buzzer, LOW);
     estado = 3;
-}
+    }
+
 
 else if(estado == 3){
 
@@ -203,11 +265,11 @@ else if(estado == 3){
     digitalWrite(MOTOR1_H, HIGH);
     digitalWrite(MOTOR1_L, LOW);
 
-    digitalWrite(MOTOR2_H, HIGH);
-    digitalWrite(MOTOR2_L, LOW);
+    digitalWrite(MOTOR2_H, LOW);
+    digitalWrite(MOTOR2_L, HIGH);
   }
 
-if(digitalRead(BOTAO_DOWN) == HIGH || Tensao < 6 ){
+if(digitalRead(BOTAO_DOWN) == HIGH || tensao < 5 ){
   estado = 4;
 }
 
@@ -229,46 +291,52 @@ int pulsosTemp = 0;
 int leitura = digitalRead(TERMISTOR1);
  if (tempoAtual - tempoAnterior >= intervalo){
   tempoAnterior = tempoAtual;
-  
+    salvarSD();
     noInterrupts();
-   pulsosTemp = pulsos;
+   pulsosTemp = (pulsos / 48);
+   float pulsosTemp1 = pulsos;
+
 	 pulsos = 0;
     interrupts();
 
 	//rpm
-	rpm = pulsosTemp * 60;
+	rpm = (pulsosTemp1 * 60);
 
     // DISTÂNCIA percorrida nesse intervalo
  distancia = pulsosTemp * circunferencia_roda; //a definir circunferencia
 
     // VELOCIDADE (m/s)
     velocidade = distancia / 1; // 1 segundo
+    velocidade = fabs(velocidade);
 	
 	 //distancia total
-  distancia_total += pulsosTemp * circunferencia_roda;
+  distancia_total += fabs(pulsosTemp * circunferencia_roda);
+  
 
-int adc = analogRead(HALL_PIN);
 
    Serial.print("Pulsos por segundo: ");
   Serial.println(pulsosTemp);
    Serial.print("Temperatura:");
   Serial.println(Temperatura);
   Serial.print("RPM");
-  Serial.println(RPM);
+  Serial.println(rpm);
   Serial.print("Velocidade:");
-  Serial.println(Velocidade);
+  Serial.println(velocidade);
   Serial.print("Distancia:");
-  Serial.println(Distancia);
+  Serial.println(distancia_total);
   Serial.print("Tensao:");
-  Serial.println(Tensao);
+  Serial.println(tensao);
   
  }
-  Temperatura = lerTemperatura();
-  RPM = rpm;
-  Velocidade = velocidade;
-  Distancia = distancia_total;
-  Tensao = lerTensao();
-
-   // mostra no serial
+  
  
-}
+  sensorVal1 = velocidade;
+  sensorVal2 = distancia_total;
+  sensorVal3 = rpm;
+
+
+  Blynk.run(); 
+  timer.run(); 
+  
+ 
+  }
