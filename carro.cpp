@@ -8,7 +8,7 @@ unsigned long intervalo = 1000;
 #define led_vermelho 2
 #define led_verde 4
 #define led_azul 15
-#define TERMISTOR1 39
+#define TERMISTOR1 33
 #define BOTAO_RTD 34
 #define BOTAO_DOWN 35
 #define DIV_TENS 26
