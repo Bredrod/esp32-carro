@@ -1,5 +1,28 @@
 #include <math.h>
 
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL2oEF18NbX"
+#define BLYNK_TEMPLATE_NAME "Telemetria Tesla"
+#define BLYNK_AUTH_TOKEN "31qqdUd7bzKjkoZZPrCm1eL2PgXMry53"
+
+float Temperatura;
+float RPM;
+float Velocidade;
+float Distancia;
+float Tensao;
+
+
+
+// objeto timer
+BlynkTimer timer;
+
+
+
+// dados da rede
+const char* ssid = "M34 de Jao";
+const char* senha = "epiphonecasino";
 
 unsigned long tempoAnterior = 0;
 unsigned long intervalo = 1000;
@@ -83,9 +106,58 @@ float lerTemperatura() {
     return temperaturaC;
 }
 
+
+// função chamada periodicamente
+void myTimer() {
+
+  // leitura analógica
+  Temperatura = lerTemperatura();
+  RPM = rpm;
+  Velocidade = velocidade;
+  Distancia = distancia_total;
+  Tensao = lerTensao();
+
+  Blynk.virtualWrite(V0, Temperatura);
+  Blynk.virtualWrite(V1, RPM);
+  Blynk.virtualWrite(V2, Velocidade);
+  Blynk.virtualWrite(V3, Distancia);
+  Blynk.virtualWrite(V4, Tensao);
+
+  // mostra no serial
+  Serial.print("Temperatura:")
+  Serial.println(Temperatura);
+  Serial.print("RPM")
+  Serial.println(RPM);
+  Serial.print("Velocidade:")
+  Serial.println(Velocidade);
+  Serial.print("Distancia:")
+  Serial.println(Distancia);
+  Serial.print("Tensao:")
+  Serial.println(Tensao);
+}
+
 int estado = 0;
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+   Blynk.begin(BLYNK_AUTH_TOKEN, "M34 de Jao", "epiphonecasino");
+
+  // inicia Wi-Fi
+  WiFi.begin(ssid, senha);
+
+  Serial.print("Conectando");
+
+  // espera conectar
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWi-Fi conectado!");
+
+  // mostra IP
+  Serial.print("IP do ESP32: ");
+  Serial.println(WiFi.localIP());
  
 //definindo pinos
     pinMode(BOTAO_DOWN, INPUT);
@@ -108,9 +180,10 @@ attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 }
 
 void loop(){
-float tensao = lerTensao();
-float temp = lerTemperatura();
-unsigned long tempoAtual = millis();
+   Blynk.run();
+  float tensao = lerTensao();
+  float temp = lerTemperatura();
+  unsigned long tempoAtual = millis();
 
 
 
@@ -200,17 +273,6 @@ int leitura = digitalRead(TERMISTOR1);
 	 //distancia total
   distancia_total += pulsosTemp * circunferencia_roda;
   
-
-  Serial.print("velocidade:");
-  Serial.println(velocidade);
-  Serial.print("distancia:");
-  Serial.println(distancia);
-  Serial.print("distancia total");
-  Serial.println(distancia_total);
-  Serial.print("temperatura:");
-  Serial.println(temp);
-  Serial.print("tensao:");
-  Serial.println(tensao);
-    }
-
+ }
+ 
 }
