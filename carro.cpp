@@ -113,7 +113,6 @@ float lerTemperatura() {
 //elementos da telemetria
 float sensorVal1;
 int sensorVal2;
-int sensorVal3;
 
 BlynkTimer timer; 
 float tensao;
@@ -122,8 +121,7 @@ void myTimer()
 {
   Blynk.virtualWrite(V0, Temperatura);
   Blynk.virtualWrite(V1, sensorVal1);
-  Blynk.virtualWrite(V2, sensorVal2);
-  Blynk.virtualWrite(V3, sensorVal3);  
+  Blynk.virtualWrite(V2, sensorVal2);  
   Blynk.virtualWrite(V4, tensao);
 }
 
@@ -240,7 +238,7 @@ if(estado == 0 || estado == 4){
 
 
 
-   else if(estado == 1){
+   else if(estado == 1 && Temperatura > 0 && Temperatura < 45 && tensao > 5){
 
     digitalWrite(led_verde, HIGH);
     digitalWrite(led_vermelho, HIGH);
@@ -271,7 +269,7 @@ else if(estado == 3){
     digitalWrite(MOTOR2_L, HIGH);
   }
 
-if(digitalRead(BOTAO_DOWN) == HIGH || tensao < 5 ){
+if(digitalRead(BOTAO_DOWN) == HIGH || tensao < 5 || Temperatura < 0 || Temperatura > 45){
   estado = 4;
 }
 
@@ -296,13 +294,11 @@ int leitura = digitalRead(TERMISTOR1);
     salvarSD();
     noInterrupts();
    pulsosTemp = (pulsos / 48);
-   float pulsosTemp1 = pulsos;
 
 	 pulsos = 0;
     interrupts();
 
-	//rpm
-	rpm = (pulsosTemp1 * 60);
+	
 
     // DISTÂNCIA percorrida nesse intervalo
  distancia = pulsosTemp * circunferencia_roda; //a definir circunferencia
@@ -320,8 +316,6 @@ int leitura = digitalRead(TERMISTOR1);
   Serial.println(pulsosTemp);
    Serial.print("Temperatura:");
   Serial.println(Temperatura);
-  Serial.print("RPM");
-  Serial.println(rpm);
   Serial.print("Velocidade:");
   Serial.println(velocidade);
   Serial.print("Distancia:");
@@ -334,7 +328,7 @@ int leitura = digitalRead(TERMISTOR1);
  
   sensorVal1 = velocidade;
   sensorVal2 = distancia_total;
-  sensorVal3 = rpm;
+  
 
 
   Blynk.run(); 
