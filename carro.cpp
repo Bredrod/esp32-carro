@@ -7,7 +7,7 @@
 
 
 
-
+//inicialização wifi
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL2oEF18NbX"
 #define BLYNK_TEMPLATE_NAME "Telemetria Tesla"
@@ -19,7 +19,7 @@
 const char* ssid = "M34 de Jao";
 const char* senha = "epiphonecasino";
 
-
+//variaveis para controle de tempo
 unsigned long tempoAnterior = 0;
 unsigned long intervalo = 1000;
 
@@ -54,13 +54,15 @@ void IRAM_ATTR contarPulso() {
   }
 }
 
-//velocidade a definir circunferencia
+//velocidade e grandezas
 float circunferencia_roda = 0.14;
 float distancia = 0;
 float velocidade = 0;
 float distancia_total = 0;
 int rpm = 0;  
 
+
+//funcao para ler a tensao
 float lerTensao(){
 
   int leitura = analogRead(DIV_TENS);
@@ -76,7 +78,7 @@ float lerTensao(){
 }
 
 
-
+//funcao para ler a temperatura
 float lerTemperatura() {
 
     int leitura = analogRead(TERMISTOR1);
@@ -108,7 +110,7 @@ float lerTemperatura() {
 }
 
 
-
+//elementos da telemetria
 float sensorVal1;
 int sensorVal2;
 int sensorVal3;
@@ -125,6 +127,8 @@ void myTimer()
   Blynk.virtualWrite(V4, tensao);
 }
 
+
+//micro SD
 void salvarSD(){
 
   File arquivo = SD.open("/telemetria.csv", FILE_APPEND);
@@ -158,12 +162,13 @@ void salvarSD(){
   }
 }
 
-
+//variavel de controle de estados
 int estado = 0;
 unsigned long tempoEstado = 0;
+
 void setup() {
   Serial.begin(115200);
-
+//conectando a wifi
  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, senha);
 
 
@@ -188,10 +193,14 @@ void setup() {
     pinMode(DIV_TENS, INPUT);
     pinMode(HALL_PIN, INPUT);
 
+	//suavizar a leitura do divisor de tensao
     analogSetPinAttenuation(DIV_TENS, ADC_11db);
+
+	//inicialização sensor hall
 attachInterrupt(digitalPinToInterrupt(HALL_PIN), contarPulso, FALLING);
 timer.setInterval(1000L, myTimer); 
 
+	//inicialização SD
 if(!SD.begin(SD_CS)){
   Serial.println("Erro no cartao SD");
   return;
@@ -209,12 +218,13 @@ if(arquivo){
 }
 
 void loop(){
+	//leitura de dados para impressão 
  tensao = lerTensao();
  Temperatura = lerTemperatura();
   unsigned long tempoAtual = millis();
 
 
-
+//controle de RTD
 if(estado == 0 || estado == 4){
 
     digitalWrite(led_vermelho, HIGH);
@@ -244,15 +254,7 @@ else if(estado == 2){
     digitalWrite(led_verde, LOW);
     digitalWrite(led_vermelho, LOW);
     digitalWrite(buzzer, HIGH);
-    delay(500);
-    digitalWrite(buzzer, LOW);
-    delay(700);
-     digitalWrite(buzzer, HIGH);
-    delay(500);
-    digitalWrite(buzzer, LOW);
-    delay(700);
-     digitalWrite(buzzer, HIGH);
-    delay(500);
+    delay(3000);
     digitalWrite(buzzer, LOW);
     estado = 3;
     }
@@ -286,7 +288,7 @@ if(estado == 4){
 
 
 
-
+//calculo da velocidade
 int pulsosTemp = 0;
 int leitura = digitalRead(TERMISTOR1);
  if (tempoAtual - tempoAnterior >= intervalo){
